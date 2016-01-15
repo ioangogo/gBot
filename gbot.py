@@ -74,16 +74,30 @@ def say(msg):
     s.send(bytes("PRIVMSG %s :%s\r\n" % (CHANNEL, msg), "UTF-8"))
     return True
 
+# Gets XKCD info
+def xkcdpharse(url):
+        try:
+            link = url + "/info.0.json"
+            page = requests.get(link, headers=headers, timeout=5)
+            page.encoding = 'UTF-8'
+            comicinfo = json.loads(page.text)
+            return "^ xkcd: " + str(comicinfo["num"]) + " Name: " + comicinfo["safe_title"] + " Img: " + comicinfo["img"] + " Title Text: " + comicinfo["alt"]
+        except Exception as e:
+            print("Bad url in message: ", link, e)
+
 # get the title from a link and send it to the channel
 def getTitle(link):
-    try:
-        page = requests.get(link, headers=headers, timeout=5)
-        page.encoding = 'UTF-8'
-        tree = html.fromstring(page.text)
-        title = tree.xpath('//title/text()')
-        say("^ " + title[0].strip())
-    except Exception:
-        print("Bad url in message: ", link)
+    if "xkcd.com" in link:
+        say(xkcdpharse(link))
+    else:
+        try:
+            page = requests.get(link, headers=headers, timeout=5)
+            page.encoding = 'UTF-8'
+            tree = html.fromstring(page.text)
+            title = tree.xpath('//title/text()')
+            say("^ " + title[0].strip())
+        except Exception:
+            print("Bad url in message: ", link)
 
 # checks if given string is a url
 # it must start with either http(s):// and/or www. and contain only
@@ -94,6 +108,9 @@ def isURL(string):
         return True
     else:
         return False
+
+
+
 
 
 class commands:
@@ -126,6 +143,12 @@ class commands:
             say("\001ACTION gives " + msg + " a delicious strip of bacon as a gift from " + info['user'] + "! \001")
         else:
             say("\001ACTION gives " + info['user'] + " a delicious strip of bacon.  \001")
+    def beer(info,usrs):
+        msg = info['msg'].replace(" ","")
+        if(msg in usrs):
+            say("\001ACTION gives " + msg + " a foaming pint of beer from " + info['user'] + "! \001")
+        else:
+            say("\001ACTION gives " + info['user'] + " foaming pint of beer.  \001")
     def listusr(info,users):
         say("I reckon there are " + str(len(users)) + " users!")
         print(users)
@@ -148,7 +171,7 @@ class commands:
             usr = msg[0]
         else:
             usr = info['user']
-        say( usr + ": ( ͡° ͜ʖ ͡°)")
+        say( usr + ": ( Í¡Â° ÍœÊ– Í¡Â°)")
     def eightball(info,usrs):
         msg = info['msg'][len(info['botcmd']):]
         url = "http://8ball.delegator.com/magic/JSON/"
@@ -156,11 +179,21 @@ class commands:
         resp = req.read()
         data = json.loads(resp.decode('utf8'))
         say(data['magic']['answer'])
-    def wisdom(info,usrs):
-        page = requests.get('http://wisdomofchopra.com/iframe.php')
-        tree = html.fromstring(page.content)
-        quote = tree.xpath('//table//td[@id="quote"]//header//h2/text()')
-        say(quote[0][1:-3])
+    def helpgen(allcmd, info, usrs):
+        say("/msg " + info['user'] + "here is help")
+        helplist = {
+            "!smug" : "!smug: Curses you or a defined user. SYNTAX: !sumug [user]",
+            "!swag" : "!swag: Out of 10?",
+            "!cn" : "!norris: Chuck Norris removed this help section",
+            "!bacon" : "!bacon: just bacon SYNTAX: !bacon [user]",
+            "!users" : "!listusr: Count the users",
+            "!btc" : "!btc: bitcoin price in currency SYNTAX: !btc [iso Country code]",
+            "!lenny" : "!lenny: ( Í¡Â° ÍœÊ– Í¡Â°)",
+            "!8ball" : "!eightball: Self explanatory SYNTAX: !8ball[question]",
+            "!beer" : "!beer: yum SYNTAX: !beer [user]"
+            }
+            for cmd in allcmd:
+                say("/msg " + info['user'] + helplist[cmd])
     cmdlist ={
         "!smug" : smug,
         "!swag" : swag,
@@ -170,7 +203,7 @@ class commands:
         "!btc" : btc,
         "!lenny" : lenny,
         "!8ball" : eightball,
-        "!wisdom" : wisdom
+        "!beer" : beer,
     }
 
     def parse(self,line):
@@ -211,6 +244,8 @@ class commands:
                     else:
                         if(not self.usrlist[out['botcmd'][1:]].isspace()):
                             say(self.usrlist[out['botcmd'][1:]])
+                elif(out["botcmd"][1:] == !help):
+                    helpgen(self.cmdlist, out, self.usrlist)
                 else:
                     self.cmdlist[out['botcmd']](out,self.usrlist)
         except Exception as FUCK:
