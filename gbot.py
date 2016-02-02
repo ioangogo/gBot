@@ -261,7 +261,7 @@ class commands:
 
 bot = commands()
 q = queue.Queue()
-feeds = ["https://www.youtube.com/feeds/videos.xml?user=eevblog","https://www.youtube.com/feeds/videos.xml?user=TheSignalPathBlog","https://www.youtube.com/feeds/videos.xml?user=mikeselectricstuff","https://www.youtube.com/feeds/videos.xml?user=eevblog2"]
+feeds = [""]
 face = threading.Thread(target=getrss.rssfunc, args = (q,feeds))
 face.daemon = True
 face.start()
