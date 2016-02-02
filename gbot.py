@@ -7,6 +7,7 @@ import requests
 import json
 import getrss
 import queue
+import random
 import threading
 import urllib.request
 from html import unescape
@@ -149,6 +150,22 @@ class commands:
             say("\001ACTION gives " + msg + " a foaming pint of beer from " + info['user'] + "! \001")
         else:
             say("\001ACTION gives " + info['user'] + " foaming pint of beer.  \001")
+    def coffee(info,usrs):
+        msg = info['msg'].replace(" ","")
+        if(msg in usrs):
+            user = msg
+        else:
+            user = info['user']
+
+        actions = [
+            "grabs the coffee funnel and advances toward %s",
+            "offers %s a fresh espresso",
+            "coffees %s",
+            "pours coffee into %s",
+            ]
+        action_template = random.choice(actions)
+        action = action_template % user
+        say("\001ACTION " + action + " \001")
     def listusr(info,users):
         say("I reckon there are " + str(len(users)) + " users!")
         print(users)
@@ -194,7 +211,8 @@ class commands:
         "!lenny" : lenny,
         "!8ball" : eightball,
         "!wisdom" : wisdom,
-        "!beer" : beer
+        "!beer" : beer,
+        "!coffee" : coffee,
     }
 
     def parse(self,line):
