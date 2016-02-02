@@ -5,10 +5,13 @@ import string
 from lxml import html
 import requests
 import json
+import getrss
+import queue
+import threading
 import urllib.request
 from html import unescape
 import re
-
+welcomemsgdone = False
 import cfg
 
 # this thing is global so it only has to be compiled into a regex object once
@@ -26,7 +29,7 @@ KEY = cfg.KEY
 CONNECTED = 0
 
 headers = {
-    'User-Agent': 'gBot: The IRC bot for noobs by noobs',
+    'User-Agent': 'Ibot: Ioans bot',
 }
 
 readbuffer = ""
@@ -110,9 +113,6 @@ def isURL(string):
         return False
 
 
-
-
-
 class commands:
     usrlist = {}
     def smug(info,usrs):
@@ -171,7 +171,7 @@ class commands:
             usr = msg[0]
         else:
             usr = info['user']
-        say( usr + ": ( Í¡Â° ÍœÊ– Í¡Â°)")
+        say( usr + ": ( ͡° ͜ʖ ͡°)")
     def eightball(info,usrs):
         msg = info['msg'][len(info['botcmd']):]
         url = "http://8ball.delegator.com/magic/JSON/"
@@ -179,21 +179,11 @@ class commands:
         resp = req.read()
         data = json.loads(resp.decode('utf8'))
         say(data['magic']['answer'])
-    def helpgen(allcmd, info, usrs):
-        say("/msg " + info['user'] + "here is help")
-        helplist = {
-            "!smug" : "!smug: Curses you or a defined user. SYNTAX: !sumug [user]",
-            "!swag" : "!swag: Out of 10?",
-            "!cn" : "!norris: Chuck Norris removed this help section",
-            "!bacon" : "!bacon: just bacon SYNTAX: !bacon [user]",
-            "!users" : "!listusr: Count the users",
-            "!btc" : "!btc: bitcoin price in currency SYNTAX: !btc [iso Country code]",
-            "!lenny" : "!lenny: ( Í¡Â° ÍœÊ– Í¡Â°)",
-            "!8ball" : "!eightball: Self explanatory SYNTAX: !8ball[question]",
-            "!beer" : "!beer: yum SYNTAX: !beer [user]"
-            }
-            for cmd in allcmd:
-                say("/msg " + info['user'] + helplist[cmd])
+    def wisdom(info,usrs):
+        page = requests.get('http://wisdomofchopra.com/iframe.php')
+        tree = html.fromstring(page.content)
+        quote = tree.xpath('//table//td[@id="quote"]//header//h2/text()')
+        say(quote[0][1:-3])
     cmdlist ={
         "!smug" : smug,
         "!swag" : swag,
@@ -203,21 +193,22 @@ class commands:
         "!btc" : btc,
         "!lenny" : lenny,
         "!8ball" : eightball,
-        "!beer" : beer,
+        "!wisdom" : wisdom,
+        "!beer" : beer
     }
 
     def parse(self,line):
-		#info returned to main loop for further processing
+                #info returned to main loop for further processing
         out = {
             'user' : getusr(line[0]),
-	        'cmd' : line[1],
+                'cmd' : line[1],
             'channel' :line[2],
             'msg' : getmsg(line)[len(getcmd(line)):],
             'botcmd' : getcmd(line)
         }
         #handle userlist here... WIP.
         if (out['cmd'] == "353"):
-			#this is terrible... find a better way later
+                        #this is terrible... find a better way later
             newusrs = line[5:]
             newusrs = ' '.join(newusrs).replace('@','').split()
             newusrs = ' '.join(newusrs).replace('%','').split()
@@ -244,8 +235,6 @@ class commands:
                     else:
                         if(not self.usrlist[out['botcmd'][1:]].isspace()):
                             say(self.usrlist[out['botcmd'][1:]])
-                elif(out["botcmd"][1:] == !help):
-                    helpgen(self.cmdlist, out, self.usrlist)
                 else:
                     self.cmdlist[out['botcmd']](out,self.usrlist)
         except Exception as FUCK:
@@ -253,7 +242,16 @@ class commands:
         return(out)
 
 bot = commands()
+q = queue.Queue()
+feeds = ["https://www.youtube.com/feeds/videos.xml?user=eevblog","https://www.youtube.com/feeds/videos.xml?user=TheSignalPathBlog","https://www.youtube.com/feeds/videos.xml?user=mikeselectricstuff","https://www.youtube.com/feeds/videos.xml?user=eevblog2"]
+face = threading.Thread(target=getrss.rssfunc, args = (q,feeds))
+face.daemon = True
+face.start()
 while 1:
+    if q.empty() != True:
+        items = q.get()
+        for item in items:
+            say(item)
     readbuffer = readbuffer+s.recv(1024).decode("UTF-8",'ignore')
     temp = str.split(readbuffer, "\n")
     readbuffer=temp.pop( )
@@ -274,11 +272,11 @@ while 1:
 
             # check if the message in a channel contains a protocol or or www.
             if (x['cmd'] == 'PRIVMSG' and x['channel'] == CHANNEL):
-                if( x['msg'].find("http") != -1 or x['msg'].find("www.") != -1):
-                    msgArray = x['msg'].split(" ")
-                    for l in msgArray:
-                        if (isURL(l)):
-                            # check if the link has a protocol if not add http
-                            if not l.lower().startswith("http"):
-                                l = 'http://' + l
-                            getTitle(l)
+              if( x['msg'].find("http") != -1 or x['msg'].find("www.") != -1):
+                  msgArray = x['msg'].split(" ")
+                  for l in msgArray:
+                      if (isURL(l)):
+                          # check if the link has a protocol if not add http
+                          if not l.lower().startswith("http"):
+                              l = 'http://' + l
+                          getTitle(l)
