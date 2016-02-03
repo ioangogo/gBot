@@ -75,8 +75,10 @@ def getmsg(line):
         i = i + 1
     message.lstrip(":")
     return message[1:]
-def say(msg):
-    s.send(bytes("PRIVMSG %s :%s\r\n" % (CHANNEL, msg), "UTF-8"))
+
+def say(msg, channel):
+    print((msg, channel))
+    s.send(bytes("PRIVMSG %s :%s\r\n" % (channel, msg), "UTF-8"))
     return True
 
 # Gets XKCD info
@@ -91,16 +93,16 @@ def xkcdpharse(url):
             print("Bad url in message: ", link, e)
 
 # get the title from a link and send it to the channel
-def getTitle(link):
+def getTitle(link, chanel):
     if "xkcd.com" in link:
-        say(xkcdpharse(link))
+        say(xkcdpharse(link), channel)
     else:
         try:
             page = requests.get(link, headers=headers, timeout=5)
             page.encoding = 'UTF-8'
             tree = html.fromstring(page.text)
             title = tree.xpath('//title/text()')
-            say("^ " + title[0].strip())
+            say("^ " + title[0].strip(), channel)
         except Exception:
             print("Bad url in message: ", link)
 
@@ -117,7 +119,7 @@ def isURL(string):
 
 class commands:
     usrlist = {}
-    def smug(info,usrs):
+    def smug(info,usrs,chan):
         msg = info['msg'].replace(" ","")
         s = "Fuck you, "
         if ((msg not in usrs) or (("gamah" in str.lower(info['msg'])) or (str.lower(NICK) in str.lower(info['msg'])) or(info['msg'].isspace()))):
@@ -125,10 +127,10 @@ class commands:
         else:
             s += msg
         s += "! :]"
-        say(s)
-    def swag(info,usrs):
-       say("out of ten!")
-    def norris(info,usrs):
+        say(s, chan)
+    def swag(info,usrs, chan):
+       say("out of ten!", chan)
+    def norris(info,usrs,chan):
         msg = info['msg'].split()
         url = "http://api.icndb.com/jokes/random"
         if(len(msg) > 0):
@@ -138,20 +140,20 @@ class commands:
         req = urllib.request.urlopen(url)
         resp = req.read()
         joke = json.loads(resp.decode('utf8'))
-        say(unescape(joke['value']['joke']).replace("  ", " "))
-    def bacon(info,usrs):
+        say(unescape(joke['value']['joke']).replace("  ", " "), chan)
+    def bacon(info,usrs,chan):
         msg = info['msg'].replace(" ","")
         if(msg in usrs):
-            say("\001ACTION gives " + msg + " a delicious strip of bacon as a gift from " + info['user'] + "! \001")
+            say("\001ACTION gives " + msg + " a delicious strip of bacon as a gift from " + info['user'] + "! \001", chan)
         else:
-            say("\001ACTION gives " + info['user'] + " a delicious strip of bacon.  \001")
-    def beer(info,usrs):
+            say("\001ACTION gives " + info['user'] + " a delicious strip of bacon.  \001", chan)
+    def beer(info,usrs,chan):
         msg = info['msg'].replace(" ","")
         if(msg in usrs):
-            say("\001ACTION gives " + msg + " a foaming pint of beer from " + info['user'] + "! \001")
+            say("\001ACTION gives " + msg + " a foaming pint of beer from " + info['user'] + "! \001", chan)
         else:
-            say("\001ACTION gives " + info['user'] + " foaming pint of beer.  \001")
-    def coffee(info,usrs):
+            say("\001ACTION gives " + info['user'] + " foaming pint of beer.  \001", chan)
+    def coffee(info,usrs,chan):
         msg = info['msg'].replace(" ","")
         if(msg in usrs):
             user = msg
@@ -166,8 +168,8 @@ class commands:
             ]
         action_template = random.choice(actions)
         action = action_template % user
-        say("\001ACTION " + action + " \001")
-    def lolol(info,usrs):
+        say("\001ACTION " + action + " \001", chan)
+    def lolol(info,usrs,chan):
         msg = info['msg'].replace(" ","")
         if(msg in usrs):
             user = msg
@@ -185,24 +187,23 @@ class commands:
         # Downcase the first letter, it just looks nicer
         items = ["l" + i[1:] for i in items]
 
-        say("A few ideas for " + user + ": " + ", ".join(items))
-        def jobebot(info,usrs):
+        say("A few ideas for " + user + ": " + ", ".join(items), chan)
+    def jobebot(info,usrs,chan):
         word1 = randwords.get_random_word('words')
         word2 = randwords.get_random_word('words')
-        say("I read %s as %s" % (word1, word2))
-    def enhanoxbot(info,usrs):
+        say("I read %s as %s" % (word1, word2), chan)
+    def enhanoxbot(info,usrs,chan):
         word1 = randwords.get_random_word('foods')
         word2 = randwords.get_random_word('foods')
         if word1.endswith("s"):
             phrase = "I wonder if %s go with %s..." % (word1, word2)
         else:
            phrase = "I wonder if %s goes with %s..." % (word1, word2)
-        say(phrase)
-
-    def listusr(info,users):
-        say("I reckon there are " + str(len(users)) + " users!")
+        say(phrase, chan)
+    def listusr(info,users,chan):
+        say("I reckon there are " + str(len(users)) + " users!", chan)
         print(users)
-    def btc(info,usrs):
+    def btc(info,usrs,chan):
         money = 0
         cur = 'USD'
         msg = info['msg'].split()
@@ -213,27 +214,27 @@ class commands:
         if(len(msg) > 0):
             if(msg[0] in data):
                 cur = msg[0]
-        say(info['user'] + ": 1 BTC = " + str(data[cur]['ask']) + " " + cur)
-    def lenny(info,usrs):
+        say(info['user'] + ": 1 BTC = " + str(data[cur]['ask']) + " " + cur, chan)
+    def lenny(info,usrs,chan):
         usr = ""
         msg = info['msg'].split()
         if(len(msg) > 0 and msg[0] in usrs):
             usr = msg[0]
         else:
             usr = info['user']
-        say( usr + ": ( ͡° ͜ʖ ͡°)")
-    def eightball(info,usrs):
+        say( usr + ": ( ͡° ͜ʖ ͡°)", chan)
+    def eightball(info,usrs,chan):
         msg = info['msg'][len(info['botcmd']):]
         url = "http://8ball.delegator.com/magic/JSON/"
         req = urllib.request.urlopen(url + msg)
         resp = req.read()
         data = json.loads(resp.decode('utf8'))
-        say(data['magic']['answer'])
-    def wisdom(info,usrs):
+        say(data['magic']['answer'], chan)
+    def wisdom(info,usrs,chan):
         page = requests.get('http://wisdomofchopra.com/iframe.php')
         tree = html.fromstring(page.content)
         quote = tree.xpath('//table//td[@id="quote"]//header//h2/text()')
-        say(quote[0][1:-3])
+        say(quote[0][1:-3], chan)
     cmdlist ={
         "!smug" : smug,
         "!swag" : swag,
@@ -282,15 +283,21 @@ class commands:
             del self.usrlist[line[3]]
         #run commands
         try:
-            if(out['channel'] == CHANNEL):
+            in_channel = out['cmd'] == 'PRIVMSG' and out['channel'] == CHANNEL
+            in_query = out['cmd'] == 'PRIVMSG' and out['channel'] == NICK
+            if in_channel:
+                channel = CHANNEL
+            elif in_query:
+                channel = out['user']
+            if in_channel or in_query:
                 if(out['botcmd'][1:] in self.usrlist.keys()):
                     if(out['botcmd'][1:] == out['user']):
                         self.usrlist[out['user']] = out['msg']
                     else:
                         if(not self.usrlist[out['botcmd'][1:]].isspace()):
-                            say(self.usrlist[out['botcmd'][1:]])
+                            say(self.usrlist[out['botcmd'][1:]], channel)
                 else:
-                    self.cmdlist[out['botcmd']](out,self.usrlist)
+                    self.cmdlist[out['botcmd']](out,self.usrlist,channel)
         except Exception as FUCK:
             print(FUCK)
         return(out)
@@ -305,12 +312,15 @@ while 1:
     readbuffer = readbuffer+s.recv(1024).decode("UTF-8",'ignore')
     temp = str.split(readbuffer, "\n")
     readbuffer=temp.pop( )
-    items = q.get()
+    try:
+        items = q.get(timeout=1)
+    except queue.Empty:
+        items = []
     try:
         if items!=[] or items!= None:
             for item in items:
                 if item != "":
-                    say(item)
+                    say(item, CHANNEL)
                     print(item)
     except Execption as E:
         if E != q.Empty:
@@ -331,7 +341,14 @@ while 1:
             print (x)
             #print(bot.usrlist)
             # check if the message in a channel contains a protocol or or www.
-            if (x['cmd'] == 'PRIVMSG' and x['channel'] == CHANNEL):
+            in_channel = x['cmd'] == 'PRIVMSG' and x['channel'] == CHANNEL
+            in_query = x['cmd'] == 'PRIVMSG' and x['channel'] == NICK
+            if in_channel:
+                channel = CHANNEL
+            elif in_query:
+                channel = x['user']
+
+            if in_channel or in_query:
               if( x['msg'].find("http") != -1 or x['msg'].find("www.") != -1):
                   msgArray = x['msg'].split(" ")
                   for l in msgArray:
@@ -339,4 +356,4 @@ while 1:
                           # check if the link has a protocol if not add http
                           if not l.lower().startswith("http"):
                               l = 'http://' + l
-                          getTitle(l)
+                          getTitle(l, channel)
