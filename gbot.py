@@ -14,6 +14,7 @@ from html import unescape
 import re
 welcomemsgdone = False
 import cfg
+import lolol
 
 # this thing is global so it only has to be compiled into a regex object once
 URLpattern = re.compile(r"((http(s)?):\/\/|(www\.)|(http(s)?):\/\/(www\.))[?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)")
@@ -166,6 +167,26 @@ class commands:
         action_template = random.choice(actions)
         action = action_template % user
         say("\001ACTION " + action + " \001")
+    def lolol(info,usrs):
+        msg = info['msg'].replace(" ","")
+        if(msg in usrs):
+            user = msg
+        else:
+            user = info['user']
+        ITEM_COUNT = 5
+
+        try:
+            lists = lolol.get_lists_cached()
+        except Exception:
+            lists = ["Lists of fruits", "Lists of transistor types", "Lists of reasons why !list is annoying"]
+
+        items = [random.choice(lists) for i in range(ITEM_COUNT)]
+
+        # Downcase the first letter, it just looks nicer
+        items = ["l" + i[1:] for i in items]
+
+        say("A few ideas for " + user + ": " + ", ".join(items))
+
     def listusr(info,users):
         say("I reckon there are " + str(len(users)) + " users!")
         print(users)
@@ -213,6 +234,7 @@ class commands:
         "!wisdom" : wisdom,
         "!beer" : beer,
         "!coffee" : coffee,
+        "!list" : lolol,
     }
 
     def parse(self,line):
