@@ -78,8 +78,11 @@ def getmsg(line):
     return message[1:]
 
 def say(msg, channel):
-    print((msg, channel))
     s.send(bytes("PRIVMSG %s :%s\r\n" % (channel, msg), "UTF-8"))
+    return True
+
+def notice(msg, channel):
+    s.send(bytes("NOTICE %s :%s\r\n" % (channel, msg), "UTF-8"))
     return True
 
 # Gets XKCD info
@@ -121,6 +124,7 @@ def isURL(string):
 class commands:
     usrlist = {}
     def smug(info,usrs,chan):
+        """be rude"""
         msg = info['msg'].replace(" ","")
         s = "Fuck you, "
         if ((msg not in usrs) or (("gamah" in str.lower(info['msg'])) or (str.lower(NICK) in str.lower(info['msg'])) or(info['msg'].isspace()))):
@@ -132,29 +136,34 @@ class commands:
     def swag(info,usrs, chan):
        say("out of ten!", chan)
     def norris(info,usrs,chan):
+        """Chuck"""
         msg = info['msg'].split()
         url = "http://api.icndb.com/jokes/random"
         if(len(msg) > 0):
             url += "?firstName=" + msg[0] + "&lastName="
         if(len(msg) > 1):
             url += msg[1]
-        req = urllib.request.urlopen(url)
+        req = urllib.request.urlopen(url, timeout=2)
         resp = req.read()
+        req.close()
         joke = json.loads(resp.decode('utf8'))
         say(unescape(joke['value']['joke']).replace("  ", " "), chan)
     def bacon(info,usrs,chan):
+        """give bacon"""
         msg = info['msg'].replace(" ","")
         if(msg in usrs):
             say("\001ACTION gives " + msg + " a delicious strip of bacon as a gift from " + info['user'] + "! \001", chan)
         else:
             say("\001ACTION gives " + info['user'] + " a delicious strip of bacon.  \001", chan)
     def beer(info,usrs,chan):
+        """give beer"""
         msg = info['msg'].replace(" ","")
         if(msg in usrs):
             say("\001ACTION gives " + msg + " a foaming pint of beer from " + info['user'] + "! \001", chan)
         else:
             say("\001ACTION gives " + info['user'] + " foaming pint of beer.  \001", chan)
     def coffee(info,usrs,chan):
+        """give coffee"""
         msg = info['msg'].replace(" ","")
         if(msg in usrs):
             user = msg
@@ -171,6 +180,7 @@ class commands:
         action = action_template % user
         say("\001ACTION " + action + " \001", chan)
     def lolol(info,usrs,chan):
+        """suggest some nice lists"""
         msg = info['msg'].replace(" ","")
         if(msg in usrs):
             user = msg
@@ -190,10 +200,12 @@ class commands:
 
         say("A few ideas for " + user + ": " + ", ".join(items), chan)
     def jobebot(info,usrs,chan):
+        """misread stuff"""
         word1 = randwords.get_random_word('words')
         word2 = randwords.get_random_word('words')
         say("I read %s as %s" % (word1, word2), chan)
     def enhanoxbot(info,usrs,chan):
+        """ponder food"""
         word1 = randwords.get_random_word('foods')
         word2 = randwords.get_random_word('foods')
         if word1.endswith("s"):
@@ -202,9 +214,11 @@ class commands:
            phrase = "I wonder if %s goes with %s..." % (word1, word2)
         say(phrase, chan)
     def listusr(info,users,chan):
+        """how many users?"""
         say("I reckon there are " + str(len(users)) + " users!", chan)
         print(users)
     def btc(info,usrs,chan):
+        """BTC conversion rates"""
         money = 0
         cur = 'USD'
         msg = info['msg'].split()
@@ -217,6 +231,7 @@ class commands:
                 cur = msg[0]
         say(info['user'] + ": 1 BTC = " + str(data[cur]['ask']) + " " + cur, chan)
     def lenny(info,usrs,chan):
+        """Lenny face"""
         usr = ""
         msg = info['msg'].split()
         if(len(msg) > 0 and msg[0] in usrs):
@@ -232,10 +247,22 @@ class commands:
         data = json.loads(resp.decode('utf8'))
         say(data['magic']['answer'], chan)
     def wisdom(info,usrs,chan):
+        """fake Chopra quotes"""
         page = requests.get('http://wisdomofchopra.com/iframe.php')
         tree = html.fromstring(page.content)
         quote = tree.xpath('//table//td[@id="quote"]//header//h2/text()')
         say(quote[0][1:-3], chan)
+    def helpcmd(info,usrs,chan):
+        """this help"""
+        lines = sorted(list(commands.cmdlist.keys()))
+        for i in lines:
+            function = commands.cmdlist[i]
+            helptext = function.__doc__
+            if helptext:
+                text = "%s: %s" % (i, helptext)
+            else:
+                text = i
+            notice(text, info['user'])
     cmdlist ={
         "!smug" : smug,
         "!swag" : swag,
@@ -251,6 +278,7 @@ class commands:
         "!list" : lolol,
         "!jobebot" : jobebot,
         "!enhanoxbot" : enhanoxbot,
+        "!help": helpcmd,
     }
 
     def parse(self,line):
