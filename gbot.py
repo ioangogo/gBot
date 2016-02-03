@@ -143,8 +143,9 @@ class commands:
             url += "?firstName=" + msg[0] + "&lastName="
         if(len(msg) > 1):
             url += msg[1]
-        req = urllib.request.urlopen(url)
+        req = urllib.request.urlopen(url, timeout=2)
         resp = req.read()
+        req.close()
         joke = json.loads(resp.decode('utf8'))
         say(unescape(joke['value']['joke']).replace("  ", " "), chan)
     def bacon(info,usrs,chan):
