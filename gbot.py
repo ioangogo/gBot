@@ -209,7 +209,7 @@ class commands:
             usr = msg[0]
         else:
             usr = info['user']
-        say( usr + ": ( Í¡Â° ÍœÊ– Í¡Â°)")
+        say( usr + ": ( ͡° ͜ʖ ͡°)")
     def eightball(info,usrs):
         msg = info['msg'][len(info['botcmd']):]
         url = "http://8ball.delegator.com/magic/JSON/"
