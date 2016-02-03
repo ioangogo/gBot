@@ -15,7 +15,6 @@ import re
 welcomemsgdone = False
 import cfg
 import lolol
-import randwords
 
 # this thing is global so it only has to be compiled into a regex object once
 URLpattern = re.compile(r"((http(s)?):\/\/|(www\.)|(http(s)?):\/\/(www\.))[?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)")
@@ -187,18 +186,6 @@ class commands:
         items = ["l" + i[1:] for i in items]
 
         say("A few ideas for " + user + ": " + ", ".join(items))
-    def jobebot(info,usrs):
-        word1 = randwords.get_random_word('words')
-        word2 = randwords.get_random_word('words')
-        say("I read %s as %s" % (word1, word2))
-    def enhanoxbot(info,usrs):
-        word1 = randwords.get_random_word('foods')
-        word2 = randwords.get_random_word('foods')
-        if word1.endswith("s"):
-            phrase = "I wonder if %s go with %s..." % (word1, word2)
-        else:
-            phrase = "I wonder if %s goes with %s..." % (word1, word2)
-        say(phrase)
 
     def listusr(info,users):
         say("I reckon there are " + str(len(users)) + " users!")
@@ -248,8 +235,6 @@ class commands:
         "!beer" : beer,
         "!coffee" : coffee,
         "!list" : lolol,
-        "!jobebot" : jobebot,
-        "!enhanoxbot" : enhanoxbot,
     }
 
     def parse(self,line):
