@@ -342,6 +342,8 @@ while 1:
         if E != q.Empty:
             print(E)
             break
+    #Clear the queque
+    q.queue.clear()
     for line in temp:
         line = str.rstrip(line)
         #print(line)
