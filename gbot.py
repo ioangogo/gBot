@@ -194,7 +194,6 @@ class commands:
     def enhanoxbot(info,usrs):
         word1 = randwords.get_random_word('foods')
         word2 = randwords.get_random_word('foods')
-        plural = word1.endswith("s")
         if word1.endswith("s"):
             phrase = "I wonder if %s go with %s..." % (word1, word2)
         else:
