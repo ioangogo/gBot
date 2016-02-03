@@ -27,6 +27,7 @@ IDENT = cfg.IDENT
 REALNAME = cfg.REALNAME
 CHANNEL = cfg.CHANNEL
 KEY = cfg.KEY
+feeds = cfg.FEEDS
 
 CONNECTED = 0
 
@@ -304,7 +305,6 @@ class commands:
 
 bot = commands()
 q = queue.Queue()
-feeds = ["https://www.youtube.com/feeds/videos.xml?user=eevblog","https://www.youtube.com/feeds/videos.xml?user=TheSignalPathBlog","https://www.youtube.com/feeds/videos.xml?user=mikeselectricstuff","https://www.youtube.com/feeds/videos.xml?user=eevblog2","https://marvintestfeed.wordpress.com/feed/atom/"]
 face = threading.Thread(target=getrss.rssfunc, args = (q,feeds))
 face.daemon = True
 face.start()
