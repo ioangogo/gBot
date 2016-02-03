@@ -15,7 +15,6 @@ import re
 welcomemsgdone = False
 import cfg
 import lolol
-import randwords
 
 # this thing is global so it only has to be compiled into a regex object once
 URLpattern = re.compile(r"((http(s)?):\/\/|(www\.)|(http(s)?):\/\/(www\.))[?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)")
@@ -187,18 +186,6 @@ class commands:
         items = ["l" + i[1:] for i in items]
 
         say("A few ideas for " + user + ": " + ", ".join(items))
-    def jobebot(info,usrs):
-        word1 = randwords.get_random_word('words')
-        word2 = randwords.get_random_word('words')
-        say("I read %s as %s" % (word1, word2))
-    def enhanoxbot(info,usrs):
-        word1 = randwords.get_random_word('foods')
-        word2 = randwords.get_random_word('foods')
-        if word1.endswith("s"):
-            phrase = "I wonder if %s go with %s..." % (word1, word2)
-        else:
-            phrase = "I wonder if %s goes with %s..." % (word1, word2)
-        say(phrase)
 
     def listusr(info,users):
         say("I reckon there are " + str(len(users)) + " users!")
@@ -222,7 +209,7 @@ class commands:
             usr = msg[0]
         else:
             usr = info['user']
-        say( usr + ": ( ͡° ͜ʖ ͡°)")
+        say( usr + ": ( Í¡Â° ÍœÊ– Í¡Â°)")
     def eightball(info,usrs):
         msg = info['msg'][len(info['botcmd']):]
         url = "http://8ball.delegator.com/magic/JSON/"
@@ -248,8 +235,6 @@ class commands:
         "!beer" : beer,
         "!coffee" : coffee,
         "!list" : lolol,
-        "!jobebot" : jobebot,
-        "!enhanoxbot" : enhanoxbot,
     }
 
     def parse(self,line):
@@ -298,18 +283,25 @@ class commands:
 
 bot = commands()
 q = queue.Queue()
-feeds = [""]
+feeds = ["https://www.youtube.com/feeds/videos.xml?user=eevblog","https://www.youtube.com/feeds/videos.xml?user=TheSignalPathBlog","https://www.youtube.com/feeds/videos.xml?user=mikeselectricstuff","https://www.youtube.com/feeds/videos.xml?user=eevblog2","https://marvintestfeed.wordpress.com/feed/atom/"]
 face = threading.Thread(target=getrss.rssfunc, args = (q,feeds))
 face.daemon = True
 face.start()
 while 1:
-    if q.empty() != True:
-        items = q.get()
-        for item in items:
-            say(item)
     readbuffer = readbuffer+s.recv(1024).decode("UTF-8",'ignore')
     temp = str.split(readbuffer, "\n")
     readbuffer=temp.pop( )
+    items = q.get()
+    try:
+        if items!=[] or items!= None:
+            for item in items:
+                if item != "":
+                    say(item)
+                    print(item)
+    except Execption as E:
+        if E != q.Empty:
+            print(E)
+            break
     for line in temp:
         line = str.rstrip(line)
         #print(line)
@@ -324,7 +316,6 @@ while 1:
             x = bot.parse(line)
             print (x)
             #print(bot.usrlist)
-
             # check if the message in a channel contains a protocol or or www.
             if (x['cmd'] == 'PRIVMSG' and x['channel'] == CHANNEL):
               if( x['msg'].find("http") != -1 or x['msg'].find("www.") != -1):
