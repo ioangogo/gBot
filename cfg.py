@@ -5,3 +5,4 @@ IDENT = NICK
 REALNAME = NICK
 CHANNEL = "changeme"
 KEY = ""
+FEEDS = []
