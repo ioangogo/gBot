@@ -230,15 +230,6 @@ class commands:
             if(msg[0] in data):
                 cur = msg[0]
         say(info['user'] + ": 1 BTC = " + str(data[cur]['ask']) + " " + cur, chan)
-    def lenny(info,usrs,chan):
-        """Lenny face"""
-        usr = ""
-        msg = info['msg'].split()
-        if(len(msg) > 0 and msg[0] in usrs):
-            usr = msg[0]
-        else:
-            usr = info['user']
-        say( usr + ": ( ͡° ͜ʖ ͡°)", chan)
     def eightball(info,usrs,chan):
         """A 8 ball"""
         responses = ["It is certain","It is decidedly so","Without a doubt","Yes"," definitely","As I see it"," yes","Most likely","Outlook good","Yes","Signs point to yes","Reply hazy try again","Ask again later","Better not tell you now","Cannot predict now","Concentrate and ask again","Don't count on it","My reply is no","My sources say no","Outlook not so good","Very doubtful"]
@@ -268,7 +259,6 @@ class commands:
         "!bacon" : bacon,
         "!users" : listusr,
         "!btc" : btc,
-        "!lenny" : lenny,
         "!8ball" : eightball,
         "!wisdom" : wisdom,
         "!beer" : beer,
