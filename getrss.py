@@ -20,6 +20,7 @@ def fetchitems(url):
     return msg
 
 def rssfunc(q, feeds):
+    q.queue.clear()
     while True:
         for stuff in feeds:
             q.put(fetchitems(stuff))
