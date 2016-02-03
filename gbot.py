@@ -78,8 +78,11 @@ def getmsg(line):
     return message[1:]
 
 def say(msg, channel):
-    print((msg, channel))
     s.send(bytes("PRIVMSG %s :%s\r\n" % (channel, msg), "UTF-8"))
+    return True
+
+def notice(msg, channel):
+    s.send(bytes("NOTICE %s :%s\r\n" % (channel, msg), "UTF-8"))
     return True
 
 # Gets XKCD info
