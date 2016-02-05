@@ -118,6 +118,7 @@ def getTitle(link, chanel):
             title = tree.xpath('//title/text()')
             mpa = dict.fromkeys(range(32))
             title = title[0].translate(mpa)
+            title = re.sub(r'\s\W',' ',title)
             say("^ " + title.strip(), channel)
         except Exception:
             print("Bad url in message: ", link)
