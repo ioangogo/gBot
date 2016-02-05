@@ -5,7 +5,7 @@ import string
 from lxml import html
 import requests
 import json
-import getrss
+import select
 import queue
 import random
 import threading
@@ -49,6 +49,7 @@ def joinch(line):
     if(line[1] == "005"):
         print("Connected! Joining channel")
         s.send(bytes("JOIN %s %s \r\n" % (CHANNEL,KEY), "UTF-8"));
+        s.setblocking(0)
         CONNECTED = 1
 
 def getcmd(line):
@@ -318,30 +319,34 @@ class commands:
         except Exception as FUCK:
             print(FUCK)
         return(out)
-
+import getrss
 bot = commands()
 q = queue.Queue()
 face = threading.Thread(target=getrss.rssfunc, args = (q,feeds))
 face.daemon = True
 face.start()
 while 1:
-    readbuffer = readbuffer+s.recv(1024).decode("UTF-8",'ignore')
-    temp = str.split(readbuffer, "\n")
-    readbuffer=temp.pop( )
+    ready = select.select([s], [], [], 1)
+    if ready[0]:
+        readbuffer = readbuffer+s.recv(1024).decode("UTF-8",'ignore')
+        temp = str.split(readbuffer, "\n")
+        readbuffer=temp.pop( )
+    else:
+       readbuffer=""
+    items=[]
     try:
-       items = q.get(timeout=1)
+        items = q.get(timeout=1)
     except queue.Empty:
-       items = []
+        items = []
     try:
         if items!=[] or items!= None:
             for item in items:
                 if item != "":
                     say(item, CHANNEL)
                     print(item)
-    except Execption as E:
-        if E != q.Empty:
-           print(E)
-           break
+            q.queue.clear()
+    except Exception as E:
+        print(E)
     for line in temp:
         line = str.rstrip(line)
         #print(line)
@@ -363,7 +368,6 @@ while 1:
                 channel = CHANNEL
             elif in_query:
                 channel = x['user']
-
             if in_channel or in_query:
               if( x['msg'].find("http") != -1 or x['msg'].find("www.") != -1):
                   msgArray = x['msg'].split(" ")
