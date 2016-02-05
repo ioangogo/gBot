@@ -7,7 +7,7 @@ requests
 
 Setup:
 1.) Install non-standard modules however you like, I suggest pip. Testing and deployment of this project lives entirely in Ubuntu 14.04 and 15.10.
-2.) Install python3-feedpharser
+2.) Install python3-feedparser
 2.) Modify `cfg.py` file to fit your parameters as necesasry.
 3.) Run `python3 gbot.py` in your favorite terminal. I do this in a screen session for monitoring.
 
