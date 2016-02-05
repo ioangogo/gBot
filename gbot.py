@@ -116,7 +116,7 @@ def getTitle(link, chanel):
             page.encoding = 'UTF-8'
             tree = html.fromstring(page.text)
             title = tree.xpath('//title/text()')
-            say("^ " + title[0].strip(), channel)
+            say("^ " + find_control_char(title[0].strip()), channel)
         except Exception:
             print("Bad url in message: ", link)
 
