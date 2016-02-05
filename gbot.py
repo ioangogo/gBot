@@ -233,7 +233,7 @@ class commands:
     def eightball(info,usrs,chan):
         """A 8 ball"""
         responses = ["It is certain","It is decidedly so","Without a doubt","Yes"," definitely","As I see it"," yes","Most likely","Outlook good","Yes","Signs point to yes","Reply hazy try again","Ask again later","Better not tell you now","Cannot predict now","Concentrate and ask again","Don't count on it","My reply is no","My sources say no","Outlook not so good","Very doubtful"]
-        msg = random.choice(response)
+        msg = random.choice(responses)
         say(msg, chan)
     def wisdom(info,usrs,chan):
         """fake Chopra quotes"""
@@ -320,30 +320,28 @@ class commands:
         return(out)
 
 bot = commands()
-q = queue.Queue()
-face = threading.Thread(target=getrss.rssfunc, args = (q,feeds))
-face.daemon = True
-face.start()
+#q = queue.Queue()
+#face = threading.Thread(target=getrss.rssfunc, args = (q,feeds))
+#face.daemon = True
+#face.start()
 while 1:
     readbuffer = readbuffer+s.recv(1024).decode("UTF-8",'ignore')
     temp = str.split(readbuffer, "\n")
     readbuffer=temp.pop( )
-    try:
-        items = q.get(timeout=1)
-    except queue.Empty:
-        items = []
-    try:
-        if items!=[] or items!= None:
-            for item in items:
-                if item != "":
-                    say(item, CHANNEL)
-                    print(item)
-    except Execption as E:
-        if E != q.Empty:
-            print(E)
-            break
-    #Clear the queque
-    q.queue.clear()
+#    try:
+#        items = q.get(timeout=1)
+#    except queue.Empty:
+#        items = []
+#    try:
+#        if items!=[] or items!= None:
+#            for item in items:
+#                if item != "":
+#                    say(item, CHANNEL)
+#                    print(item)
+#    except Execption as E:
+#        if E != q.Empty:
+#            print(E)
+#            break
     for line in temp:
         line = str.rstrip(line)
         #print(line)
