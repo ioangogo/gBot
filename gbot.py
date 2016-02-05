@@ -320,28 +320,28 @@ class commands:
         return(out)
 
 bot = commands()
-#q = queue.Queue()
-#face = threading.Thread(target=getrss.rssfunc, args = (q,feeds))
-#face.daemon = True
-#face.start()
+q = queue.Queue()
+face = threading.Thread(target=getrss.rssfunc, args = (q,feeds))
+face.daemon = True
+face.start()
 while 1:
     readbuffer = readbuffer+s.recv(1024).decode("UTF-8",'ignore')
     temp = str.split(readbuffer, "\n")
     readbuffer=temp.pop( )
-#    try:
-#        items = q.get(timeout=1)
-#    except queue.Empty:
-#        items = []
-#    try:
-#        if items!=[] or items!= None:
-#            for item in items:
-#                if item != "":
-#                    say(item, CHANNEL)
-#                    print(item)
-#    except Execption as E:
-#        if E != q.Empty:
-#            print(E)
-#            break
+   try:
+       items = q.get(timeout=1)
+   except queue.Empty:
+       items = []
+   try:
+       if items!=[] or items!= None:
+           for item in items:
+               if item != "":
+                   say(item, CHANNEL)
+                   print(item)
+   except Execption as E:
+       if E != q.Empty:
+           print(E)
+           break
     for line in temp:
         line = str.rstrip(line)
         #print(line)
