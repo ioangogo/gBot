@@ -332,7 +332,8 @@ while 1:
         temp = str.split(readbuffer, "\n")
         readbuffer=temp.pop( )
     else:
-       readbuffer=""
+        readbuffer=""
+        temp = []
     items=[]
     try:
         items = q.get(timeout=1)
