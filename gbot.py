@@ -78,12 +78,21 @@ def getmsg(line):
     message.lstrip(":")
     return message[1:]
 
+def find_control_char(s):
+    # \001 is valid, for use in action messages and such
+    for i, val in enumerate(s):
+        if ord(val) <= 0x1f and ord(val) != 1:
+            return i
+    return len(s)
+
 def say(msg, channel):
-    s.send(bytes("PRIVMSG %s :%s\r\n" % (channel, msg), "UTF-8"))
+    msg_clean = msg[:find_control_char(msg)]
+    s.send(bytes("PRIVMSG %s :%s\r\n" % (channel, msg_clean), "UTF-8"))
     return True
 
 def notice(msg, channel):
-    s.send(bytes("NOTICE %s :%s\r\n" % (channel, msg), "UTF-8"))
+    msg_clean = msg[:find_control_char(msg)]
+    s.send(bytes("NOTICE %s :%s\r\n" % (channel, msg_clean), "UTF-8"))
     return True
 
 # Gets XKCD info
