@@ -9,13 +9,14 @@ import select
 import queue
 import random
 import threading
-import urllib.request
 from html import unescape
 import re
 welcomemsgdone = False
 import cfg
 import lolol
 import randwords
+import traceback
+
 # this thing is global so it only has to be compiled into a regex object once
 URLpattern = re.compile(r"((http(s)?):\/\/|(www\.)|(http(s)?):\/\/(www\.))[?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)")
 
@@ -28,6 +29,7 @@ REALNAME = cfg.REALNAME
 CHANNEL = cfg.CHANNEL
 KEY = cfg.KEY
 feeds = cfg.FEEDS
+linkread = cfg.READLINKS
 
 CONNECTED = 0
 
@@ -99,7 +101,7 @@ def notice(msg, channel):
 def xkcdpharse(url):
         try:
             link = url + "/info.0.json"
-            page = requests.get(link, headers=headers, timeout=5)
+            page = requests.get(link, headers=headers)
             page.encoding = 'UTF-8'
             comicinfo = json.loads(page.text)
             return "^ xkcd: " + str(comicinfo["num"]) + " Name: " + comicinfo["safe_title"] + " Img: " + comicinfo["img"] + " Title Text: " + comicinfo["alt"]
@@ -112,7 +114,7 @@ def getTitle(link, chanel):
         say(xkcdpharse(link), channel)
     else:
         try:
-            page = requests.get(link, headers=headers, timeout=5)
+            page = requests.get(link, headers=headers)
             page.encoding = 'UTF-8'
             tree = html.fromstring(page.text)
             title = tree.xpath('//title/text()')
@@ -120,8 +122,9 @@ def getTitle(link, chanel):
             title = title[0].translate(mpa)
             title = re.sub(r'\s\W',' ',title)
             say("^ " + title.strip(), channel)
-        except Exception:
+        except Exception as e:
             print("Bad url in message: ", link)
+            traceback.print_exc()
 
 # checks if given string is a url
 # it must start with either http(s):// and/or www. and contain only
@@ -248,6 +251,9 @@ class commands:
         responses = ["It is certain","It is decidedly so","Without a doubt","Yes"," definitely","As I see it"," yes","Most likely","Outlook good","Yes","Signs point to yes","Reply hazy try again","Ask again later","Better not tell you now","Cannot predict now","Concentrate and ask again","Don't count on it","My reply is no","My sources say no","Outlook not so good","Very doubtful"]
         msg = random.choice(responses)
         say(msg, chan)
+    def linkreadcmd(info,usrs,chan):
+        text = "This bots Link reader is set to " + str(linkread)
+        notice(text, info['user'])
     def wisdom(info,usrs,chan):
         """fake Chopra quotes"""
         page = requests.get('http://wisdomofchopra.com/iframe.php')
@@ -265,6 +271,7 @@ class commands:
             else:
                 text = i
             notice(text, info['user'])
+        notice("http://www.fileformat.info/info/unicode/char/2063/browsertest.htm use this char, to prevent the bot catching your URL", info['user'])
     cmdlist ={
         "!smug" : smug,
         "!swag" : swag,
@@ -280,6 +287,7 @@ class commands:
         "!jobebot" : jobebot,
         "!enhanoxbot" : enhanoxbot,
         "!help": helpcmd,
+        "!readslinks" : linkreadcmd
     }
 
     def parse(self,line):
@@ -389,4 +397,5 @@ while 1:
                           # check if the link has a protocol if not add http
                           if not l.lower().startswith("http"):
                               l = 'http://' + l
-                          getTitle(l, channel)
+                          if linkread == True:
+                              getTitle(l, channel)
