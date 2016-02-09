@@ -5,7 +5,8 @@ lastcheck = datetime.datetime.now()
 import html.parser
 html_parser = html.parser.HTMLParser()
 from time import sleep
-import urllib
+import requests
+import traceback
 
 
 headers = {
@@ -14,12 +15,12 @@ headers = {
 
 print("Get rss Loaded")
 def downloadtxt(url):
-    getstuff = urllib.request.urlopen(url)
-    return getstuff
+    page = requests.get(url, headers=headers)
+    return page.text
 def fetchitems(url, prevcheck):
     msg = []
     feedcount=0
-    feed = feedparser.parse(url)
+    feed = feedparser.parse(downloadtxt(url))
     try:
         for item in feed.entries:
             if datetime.datetime.fromtimestamp(time.mktime(item.published_parsed)) >= prevcheck:
