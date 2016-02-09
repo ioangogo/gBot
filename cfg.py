@@ -6,3 +6,4 @@ REALNAME = NICK
 CHANNEL = "changeme"
 KEY = ""
 FEEDS = [""]
+READLINKS = True
