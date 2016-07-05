@@ -131,16 +131,28 @@ class commands:
         print(users)
     def btc(info,usrs):
         money = 0
-        cur = 'USD'
         msg = info['msg'].split()
-        url = "https://api.bitcoinaverage.com/ticker/global/all"
-        req = urllib.request.urlopen(url)
-        resp = req.read()
-        data = json.loads(resp.decode('utf8'))
         if(len(msg) > 0):
-            if(msg[0] in data):
-                cur = msg[0]
-        say(info['user'] + ": 1 BTC = " + str(data[cur]['ask']) + " " + cur)
+            cur = msg[0].upper()
+        else:
+            cur = "USD"
+        try:
+            url = "https://api.bitcoinaverage.com/ticker/global/"+cur
+            req = urllib.request.urlopen(url)
+            resp = req.read()
+            data = json.loads(resp.decode('utf8'))
+            
+            say(info['user'] + ": 1 BTC = " + str(data['ask']) + " " + cur)
+        except urllib.request.HTTPerror as e:
+                if e.code == 404:
+                    say("Bitcoin Average does not have any data on that currency")
+                elif e.code == 500:
+                    say("bitcoinaverage.com had a server error")
+                else:
+                    say("I got a " + str(e.code) + " from the server")
+        except:
+        	say("A error happened")
+        	
     def lenny(info,usrs):
         usr = ""
         msg = info['msg'].split()
